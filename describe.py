@@ -2,17 +2,20 @@ import pandas as pd
 import argparse as args
 import numpy as np
 from utils import load_csv
-from math import sqrt, ceil
+from math import sqrt
 from functools import reduce
+
 
 def count_non_nan(data, column):
 	return sum(1.0 for x in data[column] if not np.isnan(x))
+
 
 def calc_mean(data, column):
 	count = count_non_nan(data, column)
 	if count == 0:
 		return 0
 	return (1 / count) * sum(x for x in data[column] if not np.isnan(x))
+
 
 def calc_var(data, column):
 	count = count_non_nan(data, column)
@@ -32,11 +35,13 @@ def calc_min(data, column):
 		return 0
 	return reduce(lambda x, y: x if x <= y else y, non_nan)
 
+
 def calc_max(data, column):
 	non_nan = [x for x in data[column] if not np.isnan(x)]
 	if len(non_nan) == 0:
 		return 0
 	return reduce(lambda x, y: x if x >= y else y, non_nan)
+
 
 def calc_quartile(data, column, percent):
 	"""
@@ -83,7 +88,6 @@ def describe(file: pd.DataFrame):
 		'max': {column: calc_max(numeric_data, column) for column in numeric_data.columns},
 		'var': {column: calc_var(numeric_data, column) for column in numeric_data.columns},
 		'IQR': 	{column: calc_IQR(numeric_data, column) for column in numeric_data.columns}}
-	print(stats['count'])
 	for stat, values in stats.items():
 		describe_data.loc[stat] = values
 	print(describe_data)
@@ -91,16 +95,16 @@ def describe(file: pd.DataFrame):
 
 def main():
 	try:
-		parser = args.ArgumentParser(description="test")
-		parser.add_argument('--csv', type=str, help="location of the .csv file", required = True)
+		parser = args.ArgumentParser(description="usage: python3 describe.py --file ./datasets/dataset_train.csv")
+		parser.add_argument('--file', type=str, help="location of the .csv file", required = True)
 		arg = parser.parse_args()
-		test_file = load_csv.load(arg.csv)
-		print("Our output\n")
+		test_file = load_csv.load(arg.file)
 		describe(test_file)
-		print("\nExpected output\n")
-		print(test_file.describe())
-		print(type(test_file.describe())) #Comme un csv donc il faut refaire un .csv mais avec count mean etc
 	except FileNotFoundError as e:
+		print(e)
+	except pd.errors.ParserError as e:
+		print(e)
+	except pd.errors.EmptyDataError as e:
 		print(e)
 
 
