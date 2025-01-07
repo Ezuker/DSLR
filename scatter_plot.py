@@ -7,28 +7,14 @@ from utils import load_csv
 
 def scatter_plot(csv_file: pd.DataFrame, feature1: str, feature2: str):
     data = csv_file.dropna()
-    HogwartsHouse = { 
-        'Gryffindor': {
-            'dataFrame': data.loc[data['Hogwarts House'] == 'Gryffindor'],
-            'color': 'red'
-        },
-        'Slytherin': {
-            'dataFrame': data.loc[data['Hogwarts House'] == 'Slytherin'],
-            'color': 'green'
-        },
-        'Ravenclaw': {
-            'dataFrame': data.loc[data['Hogwarts House'] == 'Ravenclaw'],
-            'color': 'blue'
-        },
-        'Hufflepuff': {
-            'dataFrame': data.loc[data['Hogwarts House'] == 'Hufflepuff'],
-            'color': 'yellow'
-        }
+    HogwartsHouse = {
+        'Gryffindor': (data.loc[data['Hogwarts House'] == 'Gryffindor'], 'red'),
+        'Slytherin': (data.loc[data['Hogwarts House'] == 'Slytherin'], 'green'),
+        'Ravenclaw': (data.loc[data['Hogwarts House'] == 'Ravenclaw'], 'blue'),
+        'Hufflepuff': (data.loc[data['Hogwarts House'] == 'Hufflepuff'], 'yellow')
     }
-    for house, items in HogwartsHouse.items():
-        x = items['dataFrame'][feature1]
-        y = items['dataFrame'][feature2]
-        plt.scatter(x, y, label=house, color=items['color'])
+    for house, (dataFrame, color) in HogwartsHouse.items():
+        plt.scatter(dataFrame[feature1], dataFrame[feature2], label=house, color=color)
     plt.legend()
     plt.title(f'Scatter plot : {feature1} vs {feature2}')
     plt.xlabel(feature1)
