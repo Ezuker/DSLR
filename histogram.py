@@ -5,7 +5,48 @@ import argparse as args
 from utils import load_csv
 
 
-def histogram(csv_file: pd.DataFrame, feature: str):
+# def histogram_object(csv_file: pd.DataFrame, feature: str):
+# 	fig, ax = plt.subplots()
+# 	slytherin = csv_file[csv_file['Hogwarts House'] == 'Slytherin'][feature]
+# 	gryffindor = csv_file[csv_file['Hogwarts House'] == 'Gryffindor'][feature]
+# 	ravenclaw = csv_file[csv_file['Hogwarts House'] == 'Ravenclaw'][feature]
+# 	hufflepuff = csv_file[csv_file['Hogwarts House'] == 'Hufflepuff'][feature]
+# 	nunique = slytherin.nunique()
+# 	bins = np.arange(0, nunique + 1)
+# 	ax.hist(slytherin, bins, histtype='step', color='green', label="Slytherin")
+# 	ax.hist(gryffindor, bins, histtype='step', color='red', label="Gryffindor")
+# 	ax.hist(ravenclaw, bins, histtype='step', color='yellow', label="Ravenclaw")
+# 	ax.hist(hufflepuff, bins, histtype='step', color='blue', label="Hufflepuff")
+# 	ax.set_title(f"Histogram comparing {feature}")
+# 	ax.set_xlabel(f"Mark of {feature}")
+# 	ax.set_ylabel(f"Number of student")
+# 	ax.legend()
+# 	plt.show()
+# 	pass
+def histogram_object(csv_file: pd.DataFrame, feature: str):
+	fig, ax = plt.subplots()
+
+	slytherin = csv_file[csv_file['Hogwarts House'] == 'Slytherin'][feature]
+	gryffindor = csv_file[csv_file['Hogwarts House'] == 'Gryffindor'][feature]
+	ravenclaw = csv_file[csv_file['Hogwarts House'] == 'Ravenclaw'][feature]
+	hufflepuff = csv_file[csv_file['Hogwarts House'] == 'Hufflepuff'][feature]
+
+	nunique = csv_file[feature].nunique()
+	bins = np.arange(0, nunique + 1)
+
+	ax.hist(slytherin, bins, histtype='step', color='green', label="Slytherin")
+	ax.hist(gryffindor, bins, histtype='step', color='red', label="Gryffindor")
+	ax.hist(ravenclaw, bins, histtype='step', color='yellow', label="Ravenclaw")
+	ax.hist(hufflepuff, bins, histtype='step', color='blue', label="Hufflepuff")
+
+	ax.set_title(f"Histogram comparing {feature}")
+	ax.set_xlabel(f"{feature}")
+	ax.set_ylabel(f"Number of students")
+	ax.legend()
+
+	plt.show()
+
+def histogram_float(csv_file: pd.DataFrame, feature: str):
 	try:
 		fig, ax = plt.subplots()
 		slytherin = csv_file[csv_file['Hogwarts House'] == 'Slytherin'][feature]
@@ -26,6 +67,8 @@ def histogram(csv_file: pd.DataFrame, feature: str):
 		plt.show()
 	except KeyError as e:
 		print(f"Please put a valid feature: {e}")
+	except TypeError as e:
+		print(e)
 
 def main():
 	parser = args.ArgumentParser(description="usage: python3 histogram.py --feature \"Astronomy\"")
@@ -33,7 +76,12 @@ def main():
 	parser.add_argument('--feature', type=str, help="name of the feature", required = True)
 	arg = parser.parse_args()
 	csv_file = load_csv.load(arg.file)
-	histogram(csv_file, arg.feature)
+	feature_type = csv_file[arg.feature].dtypes
+	if feature_type == object:
+		histogram_object(csv_file, arg.feature)
+	else:
+		histogram_float(csv_file, arg.feature)
+			
 
 
 if __name__ == '__main__':
