@@ -100,11 +100,7 @@ def main():
 		arg = parser.parse_args()
 		test_file = load_csv.load(arg.file)
 		describe(test_file)
-	except FileNotFoundError as e:
-		print(e)
-	except pd.errors.ParserError as e:
-		print(e)
-	except pd.errors.EmptyDataError as e:
+	except Exception as e:
 		print(e)
 
 

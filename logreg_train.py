@@ -1,16 +1,55 @@
 import numpy as np
 import pandas as pd
 from utils import load_csv
+from math import exp, log, prod
+
+
+
+def model(weight: np.array, x: np.array):
+	"""
+	Param: 
+	 - weight, a vector of weight (belong to a specifiq class)
+	 - x, a vector of values of features (belong to a specifiq class)
+
+	Return:
+	The probability of belonging to a class
+	"""
+	return 1 / (1 + exp(-(weight.T.dot(x))))
+
+
+def getProba(data: pd.DataFrame, weight: np.array):
+	features = ['Arithmancy', 'Astronomy', 'Herbology', 'Defense Against the Dark Arts',
+						'Divination', 'Muggle Studies', 'Ancient Runes', 'History of Magic',
+						'Transfiguration', 'Potions', 'Care of Magical Creatures', 'Charms',
+						'Flying']
+	result = []
+	for feature in features:
+		x = data[feature]
+		result.append(model(weight, x))
+	return result
+
+
+def loss(data: pd.DataFrame, weight: np.array):
+	return -log(prod(getProba(data, weight)))
+
+
+def gradient_descent(data: pd.DataFrame, weight: np.array, i: int, alpha: float):
+	proba = []
+	for _ in range(i):
+		weight = weight - alpha * 
+	return proba
 
 
 def main():
 	try:
 		data_train_file = load_csv.load()
-	except FileNotFoundError as e:
-		print(e)
-	except pd.errors.ParserError as e:
-		print(e)
-	except pd.errors.EmptyDataError as e:
+		houses = ['Slytherin', 'Ravenclaw', 'Hufflepuff', 'Gryffindor']
+		weight = np.zeros(12)
+		for house in houses:
+			proba = gradient_descent(data_train_file[house], weight, 100000, 0.01)
+			print(proba)
+		
+	except Exception as e:
 		print(e)
 
 
