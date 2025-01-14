@@ -1,6 +1,7 @@
 from asyncio import sleep
 import numpy as np
 import pandas as pd
+from prepare_data import prepare_data, scale_features
 from utils import load_csv
 from math import log, prod
 
@@ -112,25 +113,6 @@ def gradient_descent(data: pd.DataFrame, house: str, iteration: int, alpha: floa
 		weight = weight - alpha * gradient(y, y_pred, x)
 	return weight
 
-
-
-from sklearn.preprocessing import StandardScaler
-
-def scale_features(data, features):
-    """
-    Scale the features in the dataset.
-
-    Args:
-        data (pd.DataFrame): Dataset.
-        features (list): List of features to scale.
-
-    Returns:
-        pd.DataFrame: Scaled dataset.
-    """
-    scaler = StandardScaler()
-    data[features] = scaler.fit_transform(data[features])  # Scale the selected features
-    return data
-
 def save_weights(weights, classes, features):
 	"""
 	Save weights for all classes and features to a CSV file.
@@ -160,6 +142,7 @@ def accuracy_rate(weight: np.array, data: pd.DataFrame):
 			'Flying']
 	houses = ['Slytherin', 'Ravenclaw', 'Hufflepuff', 'Gryffindor']
 	test_data = data[features]
+	correct_counter = 0
 	for i, (_, student) in enumerate(test_data.iterrows()):
 		x = np.array(student.values)
 		x = np.insert(x, 0, 1)
@@ -167,8 +150,17 @@ def accuracy_rate(weight: np.array, data: pd.DataFrame):
 		for w_house in weight:
 			prob.append(model(w_house, x))
 		print(prob)
-		if i == 4:
-			return
+		for j, p in enumerate(prob):
+			if p == max(prob):
+				print(f"Student {i} belongs to {houses[j]}")
+				# test if the student belongs to the house
+				if data['Hogwarts House'][i] == houses[j]:
+					print("Correct")
+					correct_counter += 1
+				else:
+					print("Incorrect")
+				break
+	print(f"Accuracy: {correct_counter / len(data)}")
 
 
 def main():
@@ -176,7 +168,7 @@ def main():
 		data_train_file = load_csv.load("datasets/dataset_train.csv")
     
     # Supprimer les lignes avec des valeurs manquantes
-		data_train_file.dropna(inplace=True)
+		data_train_file = prepare_data(data_train_file)
 
 		# Définir les features à mettre à l'échelle
 		features = ['Arithmancy', 'Astronomy', 'Herbology', 'Defense Against the Dark Arts',

@@ -1,45 +1,63 @@
 import numpy as np
 from math import exp
 from utils import load_csv
+from prepare_data import prepare_data_without_houses, scale_features
+import pandas as pd
 
 
-def model(weight: np.array, x: np.array):
-	"""
-	Param: 
-	 - weight, a vector of weight (belong to a specifiq class)
-	 - x, a vector of values of features (belong to a specifiq class)
+def predict(weights: np.array, x: np.array):
+    """
+    Predict the house of a student based on their features.
 
-	Return:
-	The probability of belonging to a class
-	"""
-	x = np.array(x).reshape(-1, 1)  # Reshape x to (13, 1)
-	return 1 / (1 + exp(-(weight.T.dot(x))))
+    Parameters:
+    weights (np.array): The weight matrix for the logistic regression model.
+    x (np.array): The feature vector for a student.
+
+    Returns:
+    str: The predicted house for the student.
+    """
+    try: 
+        houses = ['Slytherin', 'Ravenclaw', 'Hufflepuff', 'Gryffindor']
+        probas = []
+
+        for weight in weights:
+            proba = 1 / (1 + exp(-np.dot(weight, x)))
+            probas.append(proba)
+
+        return houses[np.argmax(probas)]
+    except Exception as e:
+        print(f"Error: {e}")
+        return None
 
 
 def main():
-    weight = load_csv.load("weight.csv")
-    data = load_csv.load("datasets/dataset_test.csv")
+    try:
+        weight = load_csv.load("weight.csv")
+        data = load_csv.load("datasets/dataset_test.csv")
 
-    houses = ['Slytherin', 'Ravenclaw', 'Hufflepuff', 'Gryffindor']
-    features = ['Arithmancy', 'Astronomy', 'Herbology', 'Defense Against the Dark Arts',
-                'Divination', 'Muggle Studies', 'Ancient Runes', 'History of Magic',
-                'Transfiguration', 'Potions', 'Care of Magical Creatures', 'Charms',
-                'Flying']
+        houses = ['Slytherin', 'Ravenclaw', 'Hufflepuff', 'Gryffindor']
+        features = ['Arithmancy', 'Astronomy', 'Herbology', 'Defense Against the Dark Arts',
+                    'Divination', 'Muggle Studies', 'Ancient Runes', 'History of Magic',
+                    'Transfiguration', 'Potions', 'Care of Magical Creatures', 'Charms',
+                    'Flying']
+        
+        data = scale_features(data, features)
+        data = prepare_data_without_houses(data)
 
-    first = data[data["Index"] == 0]
+        weight_array = np.array(weight[features])
+        results = []
+        for _, row in data.iterrows():
+            x = np.array(row[features])
+            result = predict(weight_array, x)
+            results.append((_, result))
+        results_df = pd.DataFrame(results, columns=['Index', 'Hogwarts House'])
+        results_df.to_csv("houses.csv", index=False)
+    except Exception as e:
+        print(f"Error: {e}")
+    
+    
 
-    x = []
-    for feature in features:
-        x.append(first[feature].values[0])
 
-    print("Features for first index:", x)
-
-    prob = []
-    for house in houses:
-        spe_weight = weight[weight["class"] == house].drop(columns=["class"]).values
-        print(spe_weight)
-        proba = model(spe_weight, x)
-        print(f"{house}: {proba}")
 
 
 if __name__ == "__main__":
