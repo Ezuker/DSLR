@@ -90,7 +90,34 @@ def gradient(y: np.array, y_pred: np.array, x: np.array):
 
 def transformHouseToBinary(value, house):
 	return 1 if value == house else 0
-	
+
+def stochastic_gradient_descent(data: pd.DataFrame, house: str, iteration: int, alpha: float) -> list:
+	"""
+    Args:
+        data (pd.DataFrame): Training data
+        house (str): Target house name
+        iteration (int): Number of iterations
+        alpha (float): Learning rate
+
+    Returns:
+        np.array: Final weights after optimization
+    """
+	unwanted_features = ["Index", "Hogwarts House", "First Name", "Last Name", "Birthday", "Best Hand"]
+	weights = np.zeros(14)
+	y = np.array(data["Hogwarts House"].apply(lambda value: transformHouseToBinary(value, house)))
+	x = np.array(data.drop(columns=unwanted_features))
+	x = np.insert(x, 0, 1, axis=1)
+
+	for _ in range(iteration):
+		for i in range(len(x)):
+			xi = x[i]
+			yi = y[i]
+			y_pred = model(weights, xi)
+			gradient = (y_pred - yi) * xi
+			weights -= alpha * gradient
+	return weights
+
+
 def gradient_descent(data: pd.DataFrame, house: str, iteration: int, alpha: float) -> list:
 	"""Take the data and the House in arg and return a list of weight
 
@@ -167,21 +194,19 @@ def main():
 	# try:
 		data_train_file = load_csv.load("datasets/dataset_train.csv")
     
-    # Supprimer les lignes avec des valeurs manquantes
 		data_train_file = prepare_data(data_train_file)
 
-		# Définir les features à mettre à l'échelle
 		features = ['Arithmancy', 'Astronomy', 'Herbology', 'Defense Against the Dark Arts',
 					'Divination', 'Muggle Studies', 'Ancient Runes', 'History of Magic',
 					'Transfiguration', 'Potions', 'Care of Magical Creatures', 'Charms',
 					'Flying']
 		
-		# Standardiser les features
 		data_train_file = scale_features(data_train_file, features)
 		houses = ['Slytherin', 'Ravenclaw', 'Hufflepuff', 'Gryffindor']
 		weight = []
 		for house in houses:
 			weight.append(gradient_descent(data_train_file, house, 10000, 0.01))
+			# weight.append(stochastic_gradient_descent(data_train_file, house, 1000, 0.1))
 		save_weights(weight, houses, features)
 		accuracy_rate(weight, data_train_file)
 		
