@@ -92,10 +92,10 @@ def onclick(event, axs, features, data):
                 if event.inaxes == ax:
                     fig, new_ax = plt.subplots()
                     if i != j:
-                        plt.title(f'{features[i]}')
+                        plt.title(f'{features[i]} vs {features[j]}')
                         scatter_plot(features[i], features[j], new_ax, data, 20)
                     else:
-                        plt.title(f'{features[i]} vs {features[j]}')
+                        plt.title(f'{features[i]}')
                         histogram(features[i], new_ax, data)
                     plt.show()
                     break
