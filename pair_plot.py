@@ -93,6 +93,8 @@ def onclick(event, axs, features, data):
                     fig, new_ax = plt.subplots()
                     if i != j:
                         plt.title(f'{features[i]} vs {features[j]}')
+                        plt.ylabel(features[i])
+                        plt.xlabel(features[j])
                         scatter_plot(features[i], features[j], new_ax, data, 20)
                     else:
                         plt.title(f'{features[i]}')
@@ -168,7 +170,9 @@ def main():
         arg = parser.parse_args()
         csv_file = load_csv.load(arg.file)
         pair_plot(csv_file)
-    except FileNotFoundError as e:
+    except Exception as e:
+        print(e)
+    except RuntimeError as e:
         print(e)
 
 if __name__ == "__main__":
