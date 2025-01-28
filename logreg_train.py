@@ -6,51 +6,8 @@ from utils import load_csv
 from math import log, prod
 import random as rd
 import matplotlib.pyplot as plt
+import argparse as args
 
-
-
-
-# def getProba2(weight: np.array, x: np.array, y: int):
-# 	"""P(y | x;w)
-
-# 	Args:
-# 		weight (np.array): list of weight
-# 		x (np.array): value of feature
-# 		y (int): true or false
-
-# 	Returns:
-# 		float: Return the probability
-# 	"""
-# 	return model(weight, x) ** y * (1 - model(weight, x)) ** (1 - y)
-
-
-# def getProba(data: pd.DataFrame, weight: np.array):
-# 	features = ['Arithmancy', 'Astronomy', 'Herbology', 'Defense Against the Dark Arts',
-# 						'Divination', 'Muggle Studies', 'Ancient Runes', 'History of Magic',
-# 						'Transfiguration', 'Potions', 'Care of Magical Creatures', 'Charms',
-# 						'Flying']
-# 	result = []
-# 	for feature in features:
-# 		x = data[feature]
-# 		result.append(model(weight, x))
-# 	return result
-
-# def derLoss(data: pd.DataFrame, feature: str, house: str, weight: np.array):
-# 	"""y(n) = 1 if house is same as the data else 0
-# 	   x(n) = value of feature
-
-
-# 	Args:
-# 		data (pd.DataFrame): data
-# 		house (str): target House
-# 		weight (np.array): list of weight
-# 	"""
-# 	lst = []
-# 	for _,row in data.iterrows():
-# 		yn = 1 if row['Hogwarts House'] == house else 0
-# 		xn = row[feature]
-# 		lst.append((yn - model(weight, xn)) * xn)
-# 	return -sum(lst)
 
 def model(weight: np.array, x: np.array):
 	"""sig(wTx) or f(x;w) or P(Y = 1 | x;w)
@@ -91,6 +48,19 @@ def gradient(y: np.array, y_pred: np.array, x: np.array):
 def transformHouseToBinary(value, house):
 	return 1 if value == house else 0
 
+
+def plt_cost(cost_history):
+	"""
+	Display the cost vs iterations
+	"""
+	plt.subplot()
+	plt.plot(cost_history)
+	plt.xlabel('Iterations')
+	plt.ylabel('Cost')
+	plt.title('Cost vs Iterations')
+	plt.show()
+
+
 def stochastic_gradient_descent(data: pd.DataFrame, house: str, iteration: int, alpha: float) -> list:
 	"""
     Args:
@@ -102,20 +72,11 @@ def stochastic_gradient_descent(data: pd.DataFrame, house: str, iteration: int, 
     Returns:
         np.array: Final weights after optimization
     """
-	def plt_cost(cost_history):
-		"""
-		Display the cost vs iterations
-		"""
-		plt.subplot()
-		plt.plot(cost_history)
-		plt.xlabel('Iterations')
-		plt.ylabel('Cost')
-		plt.title('Cost vs Iterations')
-		plt.show()
-	unwanted_features = ["Index", "Hogwarts House", "First Name", "Last Name", "Birthday", "Best Hand"]
-	weights = np.zeros(14)
+	features = ['Herbology', 'Ancient Runes', 'Defense Against the Dark Arts', 'Potions']
+
+	weights = np.zeros(len(features) + 1)
 	y = np.array(data["Hogwarts House"].apply(lambda value: transformHouseToBinary(value, house)))
-	x = np.array(data.drop(columns=unwanted_features))
+	x = data[features]
 	x = np.insert(x, 0, 1, axis=1)
 	cost_history = []
 	for _ in range(iteration):
@@ -141,20 +102,11 @@ def minibatch_gradient_descent(data: pd.DataFrame, house: str, iteration: int, a
     Returns:
         np.array: Final weights after optimization
     """
-	def plt_cost(cost_history):
-		"""
-		Display the cost vs iterations
-		"""
-		plt.subplot()
-		plt.plot(cost_history)
-		plt.xlabel('Iterations')
-		plt.ylabel('Cost')
-		plt.title('Cost vs Iterations')
-		plt.show()
-	unwanted_features = ["Index", "Hogwarts House", "First Name", "Last Name", "Birthday", "Best Hand"]
-	weights = np.zeros(14)
+	features = ['Herbology', 'Ancient Runes', 'Defense Against the Dark Arts', 'Potions']
+
+	weights = np.zeros(len(features) + 1)
 	y = np.array(data["Hogwarts House"].apply(lambda value: transformHouseToBinary(value, house)))
-	x = np.array(data.drop(columns=unwanted_features))
+	x = data[features]
 	x = np.insert(x, 0, 1, axis=1)
 	cost_history = []
 	batch_size = 10
@@ -182,20 +134,11 @@ def gradient_descent(data: pd.DataFrame, house: str, iteration: int, alpha: floa
 	Returns:
 		proba (list): Return a list of probabilities  
 	"""
-	def plt_cost(cost_history):
-		"""
-		Display the cost vs iterations
-		"""
-		plt.subplot()
-		plt.plot(cost_history)
-		plt.xlabel('Iterations')
-		plt.ylabel('Cost')
-		plt.title('Cost vs Iterations')
-		plt.show()
-	unwantedFeature = ["Index", "Hogwarts House", "First Name", "Last Name", "Birthday", "Best Hand"]
-	weight = np.zeros(14)
+	features = ['Herbology', 'Ancient Runes', 'Defense Against the Dark Arts', 'Potions']
+
+	weight = np.zeros(len(features) + 1)
 	y = np.array(data["Hogwarts House"].apply(lambda value: transformHouseToBinary(value, house)))
-	x = np.array(data.drop(columns=unwantedFeature))
+	x = data[features]
 	x = np.insert(x, 0, 1, axis=1)
 	cost_history = []
 	for _ in range(iteration):
@@ -204,6 +147,7 @@ def gradient_descent(data: pd.DataFrame, house: str, iteration: int, alpha: floa
 		cost_history.append(loss(y, y_pred))
 	plt_cost(cost_history)
 	return weight
+
 
 def save_weights(weights, classes, features):
 	"""
@@ -228,10 +172,7 @@ def save_weights(weights, classes, features):
 
 
 def accuracy_rate(weight: np.array, data: pd.DataFrame):
-	features = ['Arithmancy', 'Astronomy', 'Herbology', 'Defense Against the Dark Arts',
-			'Divination', 'Muggle Studies', 'Ancient Runes', 'History of Magic',
-			'Transfiguration', 'Potions', 'Care of Magical Creatures', 'Charms',
-			'Flying']
+	features = ['Herbology', 'Ancient Runes', 'Defense Against the Dark Arts', 'Potions']
 	houses = ['Slytherin', 'Ravenclaw', 'Hufflepuff', 'Gryffindor']
 	test_data = data[features]
 	correct_counter = 0
@@ -256,28 +197,32 @@ def accuracy_rate(weight: np.array, data: pd.DataFrame):
 
 
 def main():
-	# try:
-		data_train_file = load_csv.load("datasets/dataset_train.csv")
-    
+	try:
+		parser = args.ArgumentParser(description="usage: python3 logreg_train.py --file path_to_csv --gd gd (optional)")
+		parser.add_argument('--file', type=str, help="location of the dataset", required = True)
+		parser.add_argument('--gd', type=str, help="type of gradient descent", required = False)
+		arg = parser.parse_args()
+		data_train_file = load_csv.load(arg.file)
+
 		data_train_file = prepare_data(data_train_file)
 
-		features = ['Arithmancy', 'Astronomy', 'Herbology', 'Defense Against the Dark Arts',
-					'Divination', 'Muggle Studies', 'Ancient Runes', 'History of Magic',
-					'Transfiguration', 'Potions', 'Care of Magical Creatures', 'Charms',
-					'Flying']
+		features = ['Herbology', 'Ancient Runes', 'Defense Against the Dark Arts', 'Potions']
 		
 		data_train_file = scale_features(data_train_file, features)
 		houses = ['Slytherin', 'Ravenclaw', 'Hufflepuff', 'Gryffindor']
 		weight = []
 		for house in houses:
-			# weight.append(gradient_descent(data_train_file, house, 10000, 0.01))
-			weight.append(stochastic_gradient_descent(data_train_file, house, 1000, 0.1))
-			# weight.append(minibatch_gradient_descent(data_train_file, house, 1000, 0.1))
+			if arg.gd == "sgd":
+				weight.append(stochastic_gradient_descent(data_train_file, house, 5000, 0.01))
+			elif arg.gd == "mgd":
+				weight.append(minibatch_gradient_descent(data_train_file, house, 1000, 0.01))
+			else:
+				weight.append(gradient_descent(data_train_file, house, 10000, 0.01))
 		save_weights(weight, houses, features)
 		accuracy_rate(weight, data_train_file)
 		
-	# except Exception as e:
-	# 	print(e)
+	except Exception as e:
+		print(e)
 
 
 if __name__ == "__main__":
