@@ -6,7 +6,7 @@ from utils import load_csv
 
 
 def histogram_object(csv_file: pd.DataFrame, feature: str):
-	fig, ax = plt.subplots()
+	_, ax = plt.subplots()
 
 	slytherin = csv_file[csv_file['Hogwarts House'] == 'Slytherin'][feature]
 	gryffindor = csv_file[csv_file['Hogwarts House'] == 'Gryffindor'][feature]
@@ -30,7 +30,7 @@ def histogram_object(csv_file: pd.DataFrame, feature: str):
 
 def histogram_float(csv_file: pd.DataFrame, feature: str):
 	try:
-		fig, ax = plt.subplots()
+		_, ax = plt.subplots()
 		slytherin = csv_file[csv_file['Hogwarts House'] == 'Slytherin'][feature]
 		gryffindor = csv_file[csv_file['Hogwarts House'] == 'Gryffindor'][feature]
 		ravenclaw = csv_file[csv_file['Hogwarts House'] == 'Ravenclaw'][feature]
@@ -54,16 +54,28 @@ def histogram_float(csv_file: pd.DataFrame, feature: str):
 
 
 def main():
-	parser = args.ArgumentParser(description="usage: python3 histogram.py --feature \"Astronomy\"")
-	parser.add_argument('--file', type=str, help="location of the dataset", required = True)
-	parser.add_argument('--feature', type=str, help="name of the feature", required = True)
-	arg = parser.parse_args()
-	csv_file = load_csv.load(arg.file)
-	feature_type = csv_file[arg.feature].dtypes
-	if feature_type == object:
-		histogram_object(csv_file, arg.feature)
-	else:
-		histogram_float(csv_file, arg.feature)
+	features = np.array(0)
+	try:
+		parser = args.ArgumentParser(description="usage: python3 histogram.py --feature \"Astronomy\"")
+		parser.add_argument('--file', type=str, help="location of the dataset", required = True)
+		parser.add_argument('--feature', type=str, help="name of the feature", required = True)
+		arg = parser.parse_args()
+		csv_file = load_csv.load(arg.file)
+		features = np.array([csv_file.columns])
+		feature_type = csv_file[arg.feature].dtypes
+		if feature_type == object:
+			histogram_object(csv_file, arg.feature)
+		else:
+			histogram_float(csv_file, arg.feature)
+	except KeyError as e:
+		print(f"Please put a valid feature: {e}")
+		if len(features) > 0:
+			print(f"Here's possible features for the file you provided:")
+			print(*features, sep=', ')
+	except Exception as e:
+		print(e)
+	except KeyboardInterrupt as e:
+		print(e)
 
 
 if __name__ == '__main__':
