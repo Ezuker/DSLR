@@ -4,7 +4,8 @@ import pandas as pd
 from prepare_data import prepare_data, scale_features
 from utils import load_csv
 from math import log, prod
-
+import random as rd
+import matplotlib.pyplot as plt
 
 
 
@@ -84,7 +85,6 @@ def gradient(y: np.array, y_pred: np.array, x: np.array):
 		y_pred (np.array): Prediction y
 	"""
 	m = len(y)
-	# return (1/m) * np.sum((y_pred - y) * x)
 	return (1/m) * np.dot(x.T, (y_pred - y))
 
 
@@ -102,19 +102,71 @@ def stochastic_gradient_descent(data: pd.DataFrame, house: str, iteration: int, 
     Returns:
         np.array: Final weights after optimization
     """
+	def plt_cost(cost_history):
+		"""
+		Display the cost vs iterations
+		"""
+		plt.subplot()
+		plt.plot(cost_history)
+		plt.xlabel('Iterations')
+		plt.ylabel('Cost')
+		plt.title('Cost vs Iterations')
+		plt.show()
 	unwanted_features = ["Index", "Hogwarts House", "First Name", "Last Name", "Birthday", "Best Hand"]
 	weights = np.zeros(14)
 	y = np.array(data["Hogwarts House"].apply(lambda value: transformHouseToBinary(value, house)))
 	x = np.array(data.drop(columns=unwanted_features))
 	x = np.insert(x, 0, 1, axis=1)
-
+	cost_history = []
 	for _ in range(iteration):
-		for i in range(len(x)):
-			xi = x[i]
-			yi = y[i]
-			y_pred = model(weights, xi)
-			gradient = (y_pred - yi) * xi
-			weights -= alpha * gradient
+		i = rd.randint(0, len(x) - 1)
+		xi = x[i:i+1]
+		yi = y[i]
+		y_pred = model(weights, xi)
+		grad = gradient(np.array([yi]), y_pred, xi)
+		weights -= alpha * grad
+		cost_history.append(loss(np.array([yi]), y_pred))
+	plt_cost(cost_history)
+	return weights
+
+
+def minibatch_gradient_descent(data: pd.DataFrame, house: str, iteration: int, alpha: float) -> list:
+	"""
+    Args:
+        data (pd.DataFrame): Training data
+        house (str): Target house name
+        iteration (int): Number of iterations
+        alpha (float): Learning rate
+
+    Returns:
+        np.array: Final weights after optimization
+    """
+	def plt_cost(cost_history):
+		"""
+		Display the cost vs iterations
+		"""
+		plt.subplot()
+		plt.plot(cost_history)
+		plt.xlabel('Iterations')
+		plt.ylabel('Cost')
+		plt.title('Cost vs Iterations')
+		plt.show()
+	unwanted_features = ["Index", "Hogwarts House", "First Name", "Last Name", "Birthday", "Best Hand"]
+	weights = np.zeros(14)
+	y = np.array(data["Hogwarts House"].apply(lambda value: transformHouseToBinary(value, house)))
+	x = np.array(data.drop(columns=unwanted_features))
+	x = np.insert(x, 0, 1, axis=1)
+	cost_history = []
+	batch_size = 10
+	for _ in range(iteration):
+		i = rd.randint(0, len(x) - 10)
+		xi = x[i:i+batch_size]
+		yi = y[i:i+batch_size]
+		y_pred = model(weights, xi)
+		grad = gradient(yi, y_pred, xi)
+		weights -= alpha * grad
+		cost_history.append(loss(yi, y_pred))
+	plt_cost(cost_history)
 	return weights
 
 
@@ -130,14 +182,27 @@ def gradient_descent(data: pd.DataFrame, house: str, iteration: int, alpha: floa
 	Returns:
 		proba (list): Return a list of probabilities  
 	"""
+	def plt_cost(cost_history):
+		"""
+		Display the cost vs iterations
+		"""
+		plt.subplot()
+		plt.plot(cost_history)
+		plt.xlabel('Iterations')
+		plt.ylabel('Cost')
+		plt.title('Cost vs Iterations')
+		plt.show()
 	unwantedFeature = ["Index", "Hogwarts House", "First Name", "Last Name", "Birthday", "Best Hand"]
 	weight = np.zeros(14)
 	y = np.array(data["Hogwarts House"].apply(lambda value: transformHouseToBinary(value, house)))
 	x = np.array(data.drop(columns=unwantedFeature))
 	x = np.insert(x, 0, 1, axis=1)
+	cost_history = []
 	for _ in range(iteration):
 		y_pred = model(weight=weight, x=x)
 		weight = weight - alpha * gradient(y, y_pred, x)
+		cost_history.append(loss(y, y_pred))
+	plt_cost(cost_history)
 	return weight
 
 def save_weights(weights, classes, features):
@@ -205,8 +270,9 @@ def main():
 		houses = ['Slytherin', 'Ravenclaw', 'Hufflepuff', 'Gryffindor']
 		weight = []
 		for house in houses:
-			weight.append(gradient_descent(data_train_file, house, 10000, 0.01))
-			# weight.append(stochastic_gradient_descent(data_train_file, house, 1000, 0.1))
+			# weight.append(gradient_descent(data_train_file, house, 10000, 0.01))
+			weight.append(stochastic_gradient_descent(data_train_file, house, 1000, 0.1))
+			# weight.append(minibatch_gradient_descent(data_train_file, house, 1000, 0.1))
 		save_weights(weight, houses, features)
 		accuracy_rate(weight, data_train_file)
 		
