@@ -68,10 +68,10 @@ def main():
 		else:
 			histogram_float(csv_file, arg.feature)
 	except KeyError as e:
-		print(f"Please put a valid feature: {e}")
+		print(f"Please put a valid feature", end="\n\n")
 		if len(features) > 0:
-			print(f"Here's possible features for the file you provided:")
-			print(*features, sep=', ')
+			print(f"Here's possible features for the file you provided:", end="\n\n")
+			print(*features[0], sep=', ')
 	except Exception as e:
 		print(e)
 	except KeyboardInterrupt as e:

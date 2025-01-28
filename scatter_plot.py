@@ -4,6 +4,7 @@ import matplotlib
 import argparse as args
 import sys
 from utils import load_csv
+import numpy as np
 
 def scatter_plot(csv_file: pd.DataFrame, feature1: str, feature2: str):
     """
@@ -26,8 +27,10 @@ def scatter_plot(csv_file: pd.DataFrame, feature1: str, feature2: str):
     - Ravenclaw: blue
     - Hufflepuff: yellow
     """
+    features = []
     try:
         data = csv_file.dropna()
+        features = np.array([data.columns])
         HogwartsHouse = {
             'Gryffindor': (data.loc[data['Hogwarts House'] == 'Gryffindor'], 'red'),
             'Slytherin': (data.loc[data['Hogwarts House'] == 'Slytherin'], 'green'),
@@ -42,7 +45,10 @@ def scatter_plot(csv_file: pd.DataFrame, feature1: str, feature2: str):
         plt.ylabel(feature2)
         plt.show()
     except KeyError as e:
-        print(f"Please put a valid feature: {e}")
+        print(f"Please put a valid feature:", end="\n\n")
+        if len(features) > 0:
+            print(f"Here's possible features for the file you provided:", end="\n\n")
+            print(*features[0], sep=', ')
 
 def main():
     try:
@@ -53,7 +59,9 @@ def main():
         arg = parser.parse_args()
         csv_file = load_csv.load(arg.file)
         scatter_plot(csv_file, arg.feature1, arg.feature2)
-    except FileNotFoundError as e:
+    except Exception as e:
+        print(e)
+    except RuntimeError as e:
         print(e)
 
 if __name__ == "__main__":
