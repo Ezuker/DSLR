@@ -3,6 +3,7 @@ from math import exp
 from utils import load_csv
 from prepare_data import prepare_data_without_houses, scale_features
 import pandas as pd
+import json
 
 
 def predict(weights: np.array, x: np.array):
@@ -30,16 +31,22 @@ def predict(weights: np.array, x: np.array):
         return None
 
 
+def read_settings():
+    try:
+        with open(".settings.json", "r") as f:
+            return json.load(f)
+    except Exception as e:
+        print(f"Error: {e}")
+        return {}
+
+
 def main():
     try:
         weight = load_csv.load("weight.csv")
-        data = load_csv.load("datasets/dataset_test.csv")
-
         houses = ['Slytherin', 'Ravenclaw', 'Hufflepuff', 'Gryffindor']
-        features = ['Arithmancy', 'Astronomy', 'Herbology', 'Defense Against the Dark Arts',
-                    'Divination', 'Muggle Studies', 'Ancient Runes', 'History of Magic',
-                    'Transfiguration', 'Potions', 'Care of Magical Creatures', 'Charms',
-                    'Flying']
+        settings = read_settings()
+        data = load_csv.load(settings.get("dataset", "dataset_train.csv"))
+        features = settings.get("features", []) 
         
         data = scale_features(data, features)
         data = prepare_data_without_houses(data)

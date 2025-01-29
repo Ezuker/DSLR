@@ -58,10 +58,10 @@ def plt_cost(cost_history):
 	plt.xlabel('Iterations')
 	plt.ylabel('Cost')
 	plt.title('Cost vs Iterations')
-	plt.show()
+	# plt.show()
 
 
-def stochastic_gradient_descent(data: pd.DataFrame, house: str, iteration: int, alpha: float) -> list:
+def stochastic_gradient_descent(data: pd.DataFrame, features: list, house: str, iteration: int, alpha: float) -> list:
 	"""
     Args:
         data (pd.DataFrame): Training data
@@ -72,8 +72,6 @@ def stochastic_gradient_descent(data: pd.DataFrame, house: str, iteration: int, 
     Returns:
         np.array: Final weights after optimization
     """
-	features = ['Herbology', 'Ancient Runes', 'Defense Against the Dark Arts', 'Potions']
-
 	weights = np.zeros(len(features) + 1)
 	y = np.array(data["Hogwarts House"].apply(lambda value: transformHouseToBinary(value, house)))
 	x = data[features]
@@ -91,7 +89,7 @@ def stochastic_gradient_descent(data: pd.DataFrame, house: str, iteration: int, 
 	return weights
 
 
-def minibatch_gradient_descent(data: pd.DataFrame, house: str, iteration: int, alpha: float) -> list:
+def minibatch_gradient_descent(data: pd.DataFrame, features: list, house: str, iteration: int, alpha: float) -> list:
 	"""
     Args:
         data (pd.DataFrame): Training data
@@ -102,8 +100,6 @@ def minibatch_gradient_descent(data: pd.DataFrame, house: str, iteration: int, a
     Returns:
         np.array: Final weights after optimization
     """
-	features = ['Herbology', 'Ancient Runes', 'Defense Against the Dark Arts', 'Potions']
-
 	weights = np.zeros(len(features) + 1)
 	y = np.array(data["Hogwarts House"].apply(lambda value: transformHouseToBinary(value, house)))
 	x = data[features]
@@ -122,7 +118,7 @@ def minibatch_gradient_descent(data: pd.DataFrame, house: str, iteration: int, a
 	return weights
 
 
-def gradient_descent(data: pd.DataFrame, house: str, iteration: int, alpha: float) -> list:
+def gradient_descent(data: pd.DataFrame, features: list, house: str, iteration: int, alpha: float) -> list:
 	"""Take the data and the House in arg and return a list of weight
 
 	Args:
@@ -134,8 +130,6 @@ def gradient_descent(data: pd.DataFrame, house: str, iteration: int, alpha: floa
 	Returns:
 		proba (list): Return a list of probabilities  
 	"""
-	features = ['Herbology', 'Ancient Runes', 'Defense Against the Dark Arts', 'Potions']
-
 	weight = np.zeros(len(features) + 1)
 	y = np.array(data["Hogwarts House"].apply(lambda value: transformHouseToBinary(value, house)))
 	x = data[features]
@@ -171,8 +165,7 @@ def save_weights(weights, classes, features):
 	df.to_csv("weight.csv", index=False)
 
 
-def accuracy_rate(weight: np.array, data: pd.DataFrame):
-	features = ['Herbology', 'Ancient Runes', 'Defense Against the Dark Arts', 'Potions']
+def accuracy_rate(weight: np.array, data: pd.DataFrame, features: list):
 	houses = ['Slytherin', 'Ravenclaw', 'Hufflepuff', 'Gryffindor']
 	test_data = data[features]
 	correct_counter = 0
@@ -182,7 +175,6 @@ def accuracy_rate(weight: np.array, data: pd.DataFrame):
 		prob = []
 		for w_house in weight:
 			prob.append(model(w_house, x))
-		print(prob)
 		for j, p in enumerate(prob):
 			if p == max(prob):
 				print(f"Student {i} belongs to {houses[j]}")
@@ -196,30 +188,27 @@ def accuracy_rate(weight: np.array, data: pd.DataFrame):
 	print(f"Accuracy: {correct_counter / len(data)}")
 
 
+import chooser
+
 def main():
 	try:
-		parser = args.ArgumentParser(description="usage: python3 logreg_train.py --file path_to_csv --gd gd (optional)")
-		parser.add_argument('--file', type=str, help="location of the dataset", required = True)
-		parser.add_argument('--gd', type=str, help="type of gradient descent", required = False)
-		arg = parser.parse_args()
-		data_train_file = load_csv.load(arg.file)
-
+		features, algo, dataset, accuracy = chooser.choose()
+		data_train_file = load_csv.load(dataset)
 		data_train_file = prepare_data(data_train_file)
-
-		features = ['Herbology', 'Ancient Runes', 'Defense Against the Dark Arts', 'Potions']
-		
 		data_train_file = scale_features(data_train_file, features)
 		houses = ['Slytherin', 'Ravenclaw', 'Hufflepuff', 'Gryffindor']
 		weight = []
 		for house in houses:
-			if arg.gd == "sgd":
-				weight.append(stochastic_gradient_descent(data_train_file, house, 5000, 0.01))
-			elif arg.gd == "mgd":
-				weight.append(minibatch_gradient_descent(data_train_file, house, 1000, 0.01))
+			if algo == "sgd":
+				weight.append(stochastic_gradient_descent(data_train_file, features, house, 5000, 0.01))
+			elif algo == "mgd":
+				weight.append(minibatch_gradient_descent(data_train_file, features, house, 1000, 0.01))
 			else:
-				weight.append(gradient_descent(data_train_file, house, 10000, 0.01))
+				weight.append(gradient_descent(data_train_file, features, house, 10000, 0.01))
 		save_weights(weight, houses, features)
-		accuracy_rate(weight, data_train_file)
+		if accuracy:
+			accuracy_rate(weight, data_train_file, features)
+		print(f'Model trained successfully with {algo}!')
 		
 	except Exception as e:
 		print(e)
