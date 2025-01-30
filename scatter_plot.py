@@ -1,9 +1,6 @@
 import pandas as pd
 import matplotlib.pyplot as plt
-import matplotlib
 import argparse as args
-import sys
-from utils import load_csv
 import numpy as np
 
 def scatter_plot(csv_file: pd.DataFrame, feature1: str, feature2: str):
@@ -57,7 +54,7 @@ def main():
         parser.add_argument('--feature1', type=str, help="name of the feature", required = True)
         parser.add_argument('--feature2', type=str, help="name of the feature", required = True)
         arg = parser.parse_args()
-        csv_file = load_csv.load(arg.file)
+        csv_file = pd.read_csv(arg.file)
         scatter_plot(csv_file, arg.feature1, arg.feature2)
     except Exception as e:
         print(e)

@@ -2,7 +2,6 @@ import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
 import argparse as args
-from utils import load_csv
 
 
 def histogram_object(csv_file: pd.DataFrame, feature: str):
@@ -60,7 +59,7 @@ def main():
 		parser.add_argument('--file', type=str, help="location of the dataset", required = True)
 		parser.add_argument('--feature', type=str, help="name of the feature", required = True)
 		arg = parser.parse_args()
-		csv_file = load_csv.load(arg.file)
+		csv_file = pd.read_csv(arg.file)
 		features = np.array([csv_file.columns])
 		feature_type = csv_file[arg.feature].dtypes
 		if feature_type == object:

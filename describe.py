@@ -1,7 +1,6 @@
 import pandas as pd
 import argparse as args
 import numpy as np
-from utils import load_csv
 from math import sqrt
 from functools import reduce
 
@@ -98,7 +97,7 @@ def main():
 		parser = args.ArgumentParser(description="usage: python3 describe.py --file ./datasets/dataset_train.csv")
 		parser.add_argument('--file', type=str, help="location of the .csv file", required = True)
 		arg = parser.parse_args()
-		test_file = load_csv.load(arg.file)
+		test_file = pd.read_csv(arg.file)
 		describe(test_file)
 	except Exception as e:
 		print(e)

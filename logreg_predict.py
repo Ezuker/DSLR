@@ -1,6 +1,5 @@
 import numpy as np
 from math import exp
-from utils import load_csv
 from prepare_data import prepare_data_without_houses, scale_features
 import pandas as pd
 import json
@@ -42,10 +41,9 @@ def read_settings():
 
 def main():
     try:
-        weight = load_csv.load("weight.csv")
-        houses = ['Slytherin', 'Ravenclaw', 'Hufflepuff', 'Gryffindor']
+        weight = pd.read_csv("weight.csv")
         settings = read_settings()
-        data = load_csv.load(settings.get("dataset", "dataset_train.csv"))
+        data = pd.read_csv(settings.get("dataset", "dataset_train.csv"))
         features = settings.get("features", []) 
         
         data = scale_features(data, features)

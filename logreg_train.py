@@ -1,12 +1,9 @@
-from asyncio import sleep
 import numpy as np
 import pandas as pd
 from prepare_data import prepare_data, scale_features
-from utils import load_csv
-from math import log, prod
 import random as rd
 import matplotlib.pyplot as plt
-import argparse as args
+import chooser
 
 
 def model(weight: np.array, x: np.array):
@@ -177,23 +174,17 @@ def accuracy_rate(weight: np.array, data: pd.DataFrame, features: list):
 			prob.append(model(w_house, x))
 		for j, p in enumerate(prob):
 			if p == max(prob):
-				print(f"Student {i} belongs to {houses[j]}")
-				# test if the student belongs to the house
 				if data['Hogwarts House'][i] == houses[j]:
-					print("Correct")
 					correct_counter += 1
-				else:
-					print("Incorrect")
 				break
+	print(f"{correct_counter}/{len(test_data)} Corrects")
 	print(f"Accuracy: {correct_counter / len(data)}")
 
-
-import chooser
 
 def main():
 	try:
 		features, algo, dataset, accuracy = chooser.choose()
-		data_train_file = load_csv.load(dataset)
+		data_train_file = pd.read_csv(dataset)
 		data_train_file = prepare_data(data_train_file)
 		data_train_file = scale_features(data_train_file, features)
 		houses = ['Slytherin', 'Ravenclaw', 'Hufflepuff', 'Gryffindor']
@@ -209,7 +200,6 @@ def main():
 		if accuracy:
 			accuracy_rate(weight, data_train_file, features)
 		print(f'Model trained successfully with {algo}!')
-		
 	except Exception as e:
 		print(e)
 

@@ -1,9 +1,4 @@
-from asyncio import sleep
-import numpy as np
-import argparse as args
 import pandas as pd
-from utils import load_csv
-from math import log, prod
 from sklearn.preprocessing import StandardScaler
 
 
@@ -83,18 +78,3 @@ def scale_features(data, features):
     scaler = StandardScaler()
     data[features] = scaler.fit_transform(data[features])  # Scale the selected features
     return data
-
-
-def main():
-        try:
-            parser = args.ArgumentParser(description="usage: python3 scatter_plot.py --feature1 \"Astronomy\" --feature2 \"Arithmancy\"")
-            parser.add_argument('--file', type=str, help="location of the dataset", required = True)
-            arg = parser.parse_args()
-            csv_file = load_csv.load(arg.file)
-            prepared_data = prepare_data(csv_file)
-            print(prepared_data['Defense Against the Dark Arts'])
-        except FileNotFoundError as e:
-            print(e)
-
-if __name__ == "__main__":
-	main()

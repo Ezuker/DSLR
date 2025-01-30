@@ -39,16 +39,21 @@ def choose():
         'Flying'
     ]
     chosen_features = []
-    
+    oldFeatures = load_settings()
+
     feature_vars = {feature: tk.BooleanVar() for feature in features}
     for feature, var in feature_vars.items():
+        selected_features = oldFeatures.get("features", [])
+        if feature in selected_features:
+            var.set(1)
         tk.Checkbutton(root, text=feature, variable=var).pack(anchor="center")
     
     # ------------------------------------------------------------------------- #
 
     tk.Label(root, text="Choisissez l'algorithme:").pack(anchor="center", pady=10)
-    algo_var = tk.StringVar(value="gd")
     algos = ["gd", "sgd", "mgd"]
+    algo_value = oldFeatures.get("algorithm")
+    algo_var = tk.StringVar(value=algo_value if algo_value in algos else "gd")
     
     for algo in algos:
         ttk.Radiobutton(root, text=algo, variable=algo_var, value=algo).pack(anchor="center")
@@ -57,6 +62,8 @@ def choose():
 
     tk.Label(root, text="Choisissez le dataset:").pack(anchor="center", pady=10)
     dataset_var = tk.StringVar()
+    if oldFeatures.get("dataset"):
+        dataset_var.set(oldFeatures.get("dataset"))
     
     ttk.Button(root, text="Parcourir", command=lambda: select_dataset(dataset_var)).pack()
     tk.Label(root, textvariable=dataset_var).pack()

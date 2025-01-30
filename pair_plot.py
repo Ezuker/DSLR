@@ -1,11 +1,7 @@
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
-import matplotlib
 import argparse as args
-import sys
-from matplotlib.backend_bases import MouseButton
-from utils import load_csv
 
 
 def histogram(feature: str, ax, csv_file: pd.DataFrame):
@@ -168,7 +164,7 @@ def main():
         parser = args.ArgumentParser()
         parser.add_argument('--file', type=str, help="location of the dataset", required = True)
         arg = parser.parse_args()
-        csv_file = load_csv.load(arg.file)
+        csv_file = pd.read_csv(arg.file)
         pair_plot(csv_file)
     except Exception as e:
         print(e)
