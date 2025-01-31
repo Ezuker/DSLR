@@ -3,7 +3,7 @@ from math import exp
 from prepare_data import prepare_data_without_houses, scale_features
 import pandas as pd
 import json
-
+import argparse as args
 
 def predict(weights: np.array, x: np.array):
     """
@@ -41,11 +41,14 @@ def read_settings():
 
 def main():
     try:
+        parser = args.ArgumentParser()
+        parser.add_argument('--file', type=str, help="location of the dataset", required = True)
+        arg = parser.parse_args()
+        data = pd.read_csv(arg.file)
         weight = pd.read_csv("weight.csv")
         settings = read_settings()
-        data = pd.read_csv(settings.get("dataset", "dataset_train.csv"))
         features = settings.get("features", []) 
-        
+
         data = scale_features(data, features)
         data = prepare_data_without_houses(data)
 
