@@ -71,6 +71,7 @@ def choose():
     # ------------------------------------------------------------------------- #
 
     accuracy_var = tk.BooleanVar()
+    accuracy_var.set(True)
     ttk.Checkbutton(root, text="Calculer la précision", variable=accuracy_var).pack()
 
     # ------------------------------------------------------------------------- #
